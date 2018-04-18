@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Success</title>
+</head>
+<body>
+    <h1>Hello {{ user.first_name }}, you have logged in successfully!</h1>
+    <p>Your user id: {{ request.session.id }}</p>
+    <p>User_First Name: {{ user.first_name }}</p>
+    <p>User_Last Name: {{ user.last_name }}</p>
+    <p>User_Email: {{ user.email }}</p>
+
+    <form action="add_message" method="POST">
+        {% csrf_token %}
+        <textarea name="add_message" id="message" cols="100" rows="10" placeholder="Post a message"></textarea>
+        <input type="submit" value="Post Message" >
+    </form>
+
+    <form action="/logout">
+    {% csrf_token %}
+    <input type="submit" value="Logout">
+    </form>
+</body>
+</html>
