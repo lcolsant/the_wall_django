@@ -13,6 +13,13 @@
       <p><label for="pass_confirm">Password (confirm):<input type="password" name="pass_confirm" id="pass_confirm"></label></p>
       <p><input type="submit" value="Submit"></p>
     </form>
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
     <h1>Login (if registered):</h1>
     <form action='/login' method='POST'>
       {% csrf_token %}
@@ -20,12 +27,5 @@
       <p><label for="pass">Password:<input type="password" name="pass" id="pass"></label></p>
       <p><input type="submit" value="Submit"></p>
     </form>
-    {% if messages %}
-      <ul class="messages">
-      {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-      {% endfor %}
-      </ul>
-    {% endif %}
   </body>
 </html>

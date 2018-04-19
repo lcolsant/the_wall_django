@@ -66,4 +66,10 @@ class Message(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = UserManager()
 
-
+class Comment(models.Model):
+    comment = models.TextField()
+    user = models.ForeignKey(User, related_name='u_comments')
+    message = models.ForeignKey(Message, related_name='m_comments')
+    created_at = models.DateTimeField(auto_now_add=True) 
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = UserManager()

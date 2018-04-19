@@ -5,13 +5,11 @@ from django.contrib import messages
 from .models import User
 from .models import UserManager
 from .models import Message
+from .models import Comment
 import bcrypt
 
 def index(request):
   
-    #if 'users' not in request.session:    # do i need this....see line 47
-    #    request.session['users'] = []
-    
     if 'id' in request.session.keys():
         return redirect('/success')
     
@@ -28,13 +26,13 @@ def register(request):
         hash_password = bcrypt.hashpw(request.POST['pass'].encode(), bcrypt.gensalt())
         print hash_password
         User.objects.create(first_name=request.POST['fname'],last_name=request.POST['lname'],email=request.POST['email'],password=hash_password)
-        messages.success(request, "Registered successfully. Please login")
-    return redirect('/')
+        user = User.objects.filter(email=request.POST['email'])
+        request.session['id'] = user[0].id
+    return redirect('/success')
 
 def login(request):
     email = request.POST['email']
     password = request.POST['pass']
-    #user = User.objects.get(email=email)        ###why does this not work? errors out on line 32
     user = User.objects.filter(email=email)
     if len(user) == 0:
         messages.error(request,"User not recognized")
@@ -42,9 +40,7 @@ def login(request):
     else:
         if ( bcrypt.checkpw(password.encode(), user[0].password.encode()) ):
             print 'password matches'
-            messages.success(request,'User logged in')
             request.session['id'] = user[0].id
-            #request.session['users'] = user[0]   # do i need this here
             return redirect('/success')
         else:
             messages.error(request,'Invalid password.')
@@ -53,7 +49,9 @@ def login(request):
 
 def success(request):
     context = {
-        'user':User.objects.get(id=request.session['id'])
+        'user':User.objects.get(id=request.session['id']),
+        'post_data':Message.objects.all(),
+        'comment_data':Comment.objects.all(),
     }
     
     return render(request, 'wall/success.html',context)
@@ -62,10 +60,22 @@ def success(request):
 def add_message(request):
     #message = request.POST['message']
     #print 'new message:', message
-    Message.objects.create(message=request.POST['add_message'], user=request.session['id'])
+    Message.objects.create(message=request.POST['add_message'], user=User.objects.get(id=request.session['id']))
     messages.success(request,'Message posted successfully.')
 
     return redirect('/')
+
+#@app.route('/message/delete/<id>')
+def delete_message(request,id):
+    m = Message.objects.get(id=id)
+    m.delete()
+    return redirect('/success')    
+
+#@app.route('/comment',methods=['POST'])
+def comment(request):
+    Comment.objects.create(comment=request.POST['comment'],user=User.objects.get(id=request.session['id']),message=Message.objects.get(id=request.POST['message_ID']) )
+    return redirect('/success')    
+
 
 def logout(request):
     request.session.clear()
